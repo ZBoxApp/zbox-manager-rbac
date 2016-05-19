@@ -11,7 +11,7 @@ This works using [Nginx Auth Request Module](http://nginx.org/en/docs/http/ngx_h
 Rest-Req ----> [ API ] <--- Authorize to RBAC service ----> [ RBAC ]
     |                                                           |
     |                                                           |
-    --------------------- [ 200 OK | 401 Failed ] <-------------|
+    --------------------- [ 200 OK | 401 Failed ] <--------------
 ```
 
 For example the PowerDNS Proxy in Nginx would have the following configuration:
@@ -45,3 +45,6 @@ location /auth {
     proxy_set_header X-Original-URI $request_uri;
 }
 ```
+
+## Config File
+A JSon config file loaded from the `zbox_rbac_config` environment variable.
