@@ -48,3 +48,11 @@ location /auth {
 
 ## Config File
 A JSon config file loaded from the `zbox_rbac_config` environment variable.
+The config file should have the following format:
+
+```javascript
+{
+ "port": _listen_port_,
+ "zimbra_url": "https://_zimbra_server_:7071/service/admin/soap"
+}
+```
