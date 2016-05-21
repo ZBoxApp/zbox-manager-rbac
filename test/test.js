@@ -19,6 +19,15 @@ var pdnsapi = function(token, path, callback) {
     .end(callback);
 };
 
+var folioapi = function(token, path, callback) {
+  hippie(server)
+    .json()
+    .get("/folio")
+    .header("x-api-key", token)
+    .header('x-original-uri', path)
+    .end(callback);
+};
+
 (function() {
 
   describe('Getting admins', function(){
@@ -94,5 +103,60 @@ var pdnsapi = function(token, path, callback) {
       });
 
     });
+
+    describe('Folio RBAC', function() {
+      it('Should Allow Global Admin to get Whatever', function(done){
+        const path = '/' + Math.random().toString(36).substring(9);
+        folioapi(global_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(200);
+          done();
+        });
+      });
+
+      it('Deny Domain Admin to list all Companies', function(done){
+        const path = '/companies';
+        folioapi(domain_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(401);
+          done();
+        });
+      });
+
+      it('Allow Domain Admin to access his company', function(done){
+        const path = '/companies/13834853-9';
+        folioapi(domain_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(200);
+          done();
+        });
+      });
+
+      it('Allow Domain Admin to access everything under his company', function(done){
+        const random_path = '/' + Math.random().toString(36).substring(9);
+        const path = '/companies/13834853-9' + random_path;
+        folioapi(domain_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(200);
+          done();
+        });
+      });
+
+      it('Deny Domain Admin to access companies no owned', function(done){
+        const random_path = '/' + Math.random().toString(36).substring(9);
+        const path = '/companies' + random_path;
+        folioapi(domain_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(401);
+          done();
+        });
+      });
+
+      it('Deny Domain Admin to access everything not his company', function(done){
+        const random_path = '/' + Math.random().toString(36).substring(9);
+        const path = '/companies' + random_path + random_path;
+        folioapi(domain_admin_token, path, function(req, res, b){
+          expect(res.statusCode).to.be.equal(401);
+          done();
+        });
+      });
+
+    });
+
   });
 })();

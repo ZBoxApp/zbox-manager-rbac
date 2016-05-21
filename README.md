@@ -22,23 +22,35 @@ upstream rbac-manager {
 }
 
 location /powerdns_proxy/ {
-       auth_request /auth/powerdns;
-       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-       proxy_set_header x-api-key 'otto';
-       proxy_set_header Host 192.168.0.112;
-       proxy_redirect off;
-       proxy_pass http://192.168.0.112:8081/;
-       proxy_connect_timeout 10m;
-  }
+  auth_request /auth/powerdns;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header x-api-key 'otto';
+  proxy_set_header Host 192.168.0.112;
+  proxy_redirect off;
+  proxy_pass http://192.168.0.112:8081/;
+  proxy_connect_timeout 10m;
+}
 
-  location /auth {
-    proxy_pass http://rbac-manager/;
-    proxy_pass_request_body off;
-    proxy_set_header X-Original-URI $request_uri;
-  }
+location /folio/ {
+  auth_request /auth/folio;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header Host the_host;
+  proxy_redirect off;
+  proxy_pass http://company.folio.cl/;
+  proxy_cache_valid   200  5m;
+  proxy_connect_timeout 10m;
+  proxy_cache_use_stale  error timeout invalid_header updating http_500 http_502 http_503 http_504;
+  proxy_set_header Authorization "Basic theuser:thepassword";
+}
+
+location /auth {
+  proxy_pass http://rbac-manager/;
+  proxy_pass_request_body off;
+  proxy_set_header X-Original-URI $request_uri;
+}
 ```
 
-In the example `auth_request /auth/powerdns` tels Nginx that it should validate the
+In the example `auth_request /auth/powerdns` tells Nginx that it should validate the
 request asking to the `/auth/powerdns` location, wich is configured as follows at the
 `/etc/nginx/conf.d/zbox-rbac-manager.conf` file:
 
