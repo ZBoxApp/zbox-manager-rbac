@@ -44,10 +44,11 @@ location /folio/ {
 }
 
 location /auth {
-  proxy_pass http://rbac-manager/;
-  proxy_pass_request_body off;
-  proxy_set_header X-Original-URI $request_uri;
-}
+    proxy_pass http://rbac-manager/;
+    proxy_pass_request_body off;
+    proxy_set_header X-Original-URI $request_uri;
+    proxy_set_header Content-Length ""; # Without this POST,PATH,PUT,DEL fail.
+  }
 ```
 
 In the example `auth_request /auth/powerdns` tells Nginx that it should validate the
